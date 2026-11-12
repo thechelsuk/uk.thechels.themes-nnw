@@ -406,6 +406,39 @@ a[title*="Permanent"] {
     display: none;
 }
 
+/* YouTube embeds (youtube-link-rewrite.js) */
+.nnw-youtube-embed {
+    margin: 0.9em 0 1.5em;
+}
+
+.nnw-youtube-frame {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid var(--accent);
+    border-radius: 0.75em;
+    background: #000000;
+    box-sizing: border-box;
+}
+
+.nnw-youtube-iframe,
+.nnw-youtube-fallback {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+.nnw-youtube-fallback img {
+    border: 0;
+    border-radius: 0;
+}
+
+.nnw-youtube-actions {
+    margin-top: 0.5em;
+    font-size: 0.9em;
+}
+
 /* Article media (NetNewsWire 7.3): feed images, audio and video above and below the body */
 .articlePrimaryMedia:empty,
 .articleEnclosures:empty {
