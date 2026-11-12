@@ -13,7 +13,14 @@
         "www.youtube.com",
         "m.youtube.com",
         "music.youtube.com",
+        // NetNewsWire 7.3 embeds feed videos from here (see adoptFeedVideos).
+        "youtube-nocookie.com",
+        "www.youtube-nocookie.com",
     ];
+    // NetNewsWire 7.3 puts the feed's videos in its primary media and enclosures blocks as bare iframes.
+    // Never write those template tags here: this script is inlined into the template, and NNW finds them anywhere.
+    const FEED_PRIMARY_VIDEO_SELECTOR = ".nnw-primary-media .nnw-enclosure-video > iframe[src]";
+    const FEED_ENCLOSURE_VIDEO_SELECTOR = ".nnw-enclosures .nnw-enclosure-video > iframe[src]";
     const YOUTUBE_PATH_PREFIXES = ["/shorts/", "/live/", "/embed/"];
     // Plain-text YouTube URLs, with or without a scheme (e.g. Bluesky feeds).
     const YOUTUBE_TEXT_PATTERN =
@@ -279,9 +286,41 @@
         return titleVideoAnchor ? [titleVideoAnchor] : [];
     }
 
+    // Replace each NetNewsWire YouTube iframe with our embed (its own iframe sends no referrer, so YouTube may
+    // refuse it), or remove it when that video is already embedded, so a video never shows twice.
+    function adoptFeedVideos(selector, embeddedVideoIds) {
+        document.querySelectorAll(selector).forEach((iframe) => {
+            const videoInfo = getVideoInfo(iframe.getAttribute("src") || "");
+
+            if (!videoInfo) {
+                return;
+            }
+
+            if (embeddedVideoIds.has(videoInfo.videoId)) {
+                const enclosure = iframe.closest(".nnw-enclosure");
+                const group = enclosure?.parentElement;
+                enclosure?.remove();
+
+                // Drop an emptied enclosures list so the theme's :empty rule hides its slot.
+                if (group?.classList.contains("nnw-enclosures") && !group.firstElementChild) {
+                    group.remove();
+                }
+                return;
+            }
+
+            embeddedVideoIds.add(videoInfo.videoId);
+            const title = document.querySelector(".articleTitle a")?.textContent.trim();
+            iframe.replaceWith(createEmbedBlock(videoInfo, title));
+        });
+    }
+
     function rewriteYouTubeLinks() {
-        const anchors = getCandidateAnchors();
         const embeddedVideoIds = new Set();
+
+        // Document order: the primary video sits above the body, the other enclosures below it.
+        adoptFeedVideos(FEED_PRIMARY_VIDEO_SELECTOR, embeddedVideoIds);
+
+        const anchors = getCandidateAnchors();
 
         anchors.forEach((anchor) => {
             if (anchor.hasAttribute(PROCESSED_ATTRIBUTE)) {
@@ -300,6 +339,8 @@
             embeddedVideoIds.add(videoInfo.videoId);
             insertEmbed(anchor, createEmbedBlock(videoInfo, anchor.textContent.trim()));
         });
+
+        adoptFeedVideos(FEED_ENCLOSURE_VIDEO_SELECTOR, embeddedVideoIds);
     }
 
     if (document.readyState === "loading") {

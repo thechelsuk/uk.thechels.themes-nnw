@@ -30,6 +30,7 @@ A collection of themes for [NetNewsWire](https://netnewswire.com/).
 The workflow calls `scripts/build-release-artifacts.sh` to:
 
 - Inline the shared scripts into each template (see below)
+- Write each theme's `template7.3.html` for NetNewsWire 7.3 and later (see below)
 - Package each `*.nnwtheme` folder into its own `name.zip`
 - Validate that each zip contains only the correct `name.nnwtheme` root
 - Publish a GitHub Release with all zips attached
@@ -54,7 +55,8 @@ scripts/
 │   ├── youtube-link-rewrite.js    # Inline YouTube embeds + "Open in extension.app" link
 │   └── linker.js                  # Reference-style citations and a References list
 ├── inject-template-scripts.sh     # Inlines the scripts between the markers
-└── build-release-artifacts.sh     # CI: inject, zip, write release notes
+├── make-template-7.3.sh           # Writes template7.3.html with the NetNewsWire 7.3 media tags
+└── build-release-artifacts.sh     # CI: inject, write 7.3 templates, zip, write release notes
 ```
 
 Committed templates only reference the scripts between markers:
@@ -71,6 +73,14 @@ During the release, `inject-template-scripts.sh` replaces each `<script src>` wi
 To add a shared script, create it in `scripts/template-scripts/` and add a `<script src="yourscript.js"></script>` line inside the markers of each template that needs it.
 
 A theme-specific script (such as Claudio's reading time and progress bar) can be written inline in that theme's `template.html`, outside the markers.
+
+## Feed media in NetNewsWire 7.3
+
+NetNewsWire 7.3 can show audio, video and images from a feed's enclosures. It reads `template7.3.html` instead of `template.html` when a theme has one, and earlier versions ignore that file.
+
+`scripts/make-template-7.3.sh` writes `template7.3.html` at release time. It copies `template.html` and adds the primary media tag above the body and the enclosures tag below it, outside `.articleBody`. Each template therefore needs exactly one `<div id="bodyContainer" …>[[body]]</div>` line. Keep the 7.3 tags out of `template.html`: earlier versions would show them as text. The script stops the release if it finds them anywhere in that file, comments included, because NetNewsWire 7.3 also looks for them anywhere.
+
+Each `stylesheet.css` styles the media under an "Article media" heading. To check them in a browser, open `test/media-7.3.html?theme=Claudio` (or any theme name).
 
 ## Test locally
 

@@ -405,3 +405,37 @@ table tr:hover {
 a[title*="Permanent"] {
     display: none;
 }
+
+/* Article media (NetNewsWire 7.3): feed images, audio and video above and below the body */
+.articlePrimaryMedia:empty,
+.articleEnclosures:empty {
+    display: none;
+}
+
+.nnw-enclosure audio {
+    display: block;
+    width: 100%;
+    accent-color: var(--accent);
+}
+
+.nnw-enclosure video,
+.nnw-enclosure-video > iframe {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    box-sizing: border-box;
+}
+
+.nnw-enclosure-video > iframe {
+    aspect-ratio: 16 / 9;
+    border: 0;
+}
+
+.nnw-primary-image-caption,
+.nnw-enclosure-caption {
+    margin-top: 0.5em;
+    font-size: 0.85em;
+    color: var(--secondary);
+    overflow-wrap: anywhere;
+}

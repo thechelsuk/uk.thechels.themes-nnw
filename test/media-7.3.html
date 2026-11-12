@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Article media test (NetNewsWire 7.3) — thechelsuk</title>
+        <meta name="robots" content="noindex, nofollow" />
+        <link rel="icon" href="../favicon.ico" sizes="16x16 32x32 48x48" />
+        <link id="themeStylesheet" rel="stylesheet" href="../Claudio.nnwtheme/stylesheet.css" />
+        <link rel="stylesheet" href="../preview-nav.css" />
+        <script>
+            // Pick the theme with ?theme=Name (the folder name without .nnwtheme).
+            (() => {
+                const themes = ["Claudio", "Franco", "Fresh", "Guro", "Magda", "Maika", "Micha", "Retro", "Sunjiyo", "thechelsuk"];
+                const asked = new URLSearchParams(location.search).get("theme") || "";
+                const theme = themes.find((name) => name.toLowerCase() === asked.toLowerCase()) || themes[0];
+                document.getElementById("themeStylesheet").href = `../${theme}.nnwtheme/stylesheet.css`;
+                window.mediaTestThemes = themes;
+                window.mediaTestTheme = theme;
+            })();
+        </script>
+    </head>
+
+    <body>
+        <nav class="preview-site-nav" id="themePicker"><a href="../">← All themes</a></nav>
+
+        <!-- Mirrors the markup NetNewsWire 7.3 substitutes for the primary media and enclosures tags
+             (Technotes/Themes.md), in the layout make-template-7.3.sh writes. -->
+        <article class="flow">
+            <div class="articleTitle post-title flow">
+                <h1><a href="https://example.com/episode-12">Episode 12: Media in the reader</a></h1>
+            </div>
+
+            <div class="articlePrimaryMedia mediumText"><div class="nnw-primary-media">
+                <div class="nnw-primary-image">
+                    <img src="https://picsum.photos/seed/nnw73/1200/675" alt="Studio microphones" width="1200" height="675">
+                    <div class="nnw-primary-image-caption">Episode artwork: the studio on recording day</div>
+                </div>
+                <div class="nnw-enclosure nnw-enclosure-audio"><audio controls preload="none" src="https://example.invalid/episode-12.mp3"></audio><div class="nnw-enclosure-caption">episode-12-media-in-the-reader-final-mixdown.mp3 · 1:51:27 · 53.8 MB</div></div>
+            </div></div>
+
+            <div id="bodyContainer" class="articleBody flow mediumText">
+                <p>This page checks how each theme styles the audio, video and images that NetNewsWire 7.3 adds from a feed's enclosures. The lead paragraph should keep the theme's first-paragraph styling.</p>
+                <p>A second paragraph, so spacing between body paragraphs can be compared with the spacing around the media blocks.</p>
+                <h2>Notes</h2>
+                <p>Below the body come the other enclosures: an image, a video and a second audio file with a short caption.</p>
+            </div>
+
+            <div class="articleEnclosures mediumText"><div class="nnw-enclosures">
+                <div class="nnw-enclosure nnw-enclosure-image"><img src="https://picsum.photos/seed/nnw73b/900/600" alt=""></div>
+                <div class="nnw-enclosure nnw-enclosure-video"><video controls preload="none" playsinline poster="https://picsum.photos/seed/nnw73c/1280/720" src="https://example.invalid/clip.mp4" width="1280" height="720"></video><div class="nnw-enclosure-caption">Behind the scenes</div></div>
+                <div class="nnw-enclosure nnw-enclosure-video"><iframe src="about:blank" width="560" height="315" allowfullscreen title="Video placeholder"></iframe></div>
+                <div class="nnw-enclosure nnw-enclosure-audio"><audio controls preload="none" src="https://example.invalid/bonus.mp3"></audio><div class="nnw-enclosure-caption">Bonus · 4:02 · 3.1 MB</div></div>
+            </div></div>
+
+            <div class="articlePrimaryMedia mediumText"></div>
+            <p id="emptyCheck">The empty media block just above this line should take no space.</p>
+
+            <div id="footer" class="footer flow">
+                <div class="meta flow">
+                    <div class="articleDateline"><a href="https://example.com/episode-12">12 November 2026</a></div>
+                </div>
+            </div>
+        </article>
+
+        <script>
+            const picker = document.getElementById("themePicker");
+            for (const name of window.mediaTestThemes) {
+                const link = document.createElement("a");
+                link.href = `?theme=${name}`;
+                link.textContent = name === window.mediaTestTheme ? `[${name}]` : name;
+                link.style.marginLeft = "0.75em";
+                picker.append(link);
+            }
+        </script>
+    </body>
+
+</html>

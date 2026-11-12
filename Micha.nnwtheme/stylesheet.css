@@ -785,3 +785,41 @@ a[title*="Permanent"] + .nnw-ref-citation {
         font-size: 1.3em;
     }
 }
+
+/* Article media (NetNewsWire 7.3): feed images, audio and video above and below the body */
+.articlePrimaryMedia:empty,
+.articleEnclosures:empty {
+    display: none;
+}
+
+.nnw-enclosure audio {
+    display: block;
+    width: 100%;
+    accent-color: var(--accent);
+}
+
+.nnw-enclosure video,
+.nnw-enclosure-video > iframe {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    box-sizing: border-box;
+    border: 3px solid var(--primary);
+    background: #000000;
+}
+
+.nnw-enclosure-video > iframe {
+    aspect-ratio: 16 / 9;
+}
+
+.nnw-primary-image-caption,
+.nnw-enclosure-caption {
+    margin-top: 0.6em;
+    font-family: var(--display);
+    font-size: 0.72em;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    overflow-wrap: anywhere;
+}

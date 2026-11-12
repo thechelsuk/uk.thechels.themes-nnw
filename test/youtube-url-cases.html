@@ -21,6 +21,23 @@ const cases = [
   ["inside code ignored", "<p><code>youtu.be/6fCvy4-QKnA</code></p>", []],
   ["inside existing link text ignored", '<p><a href="https://thechels.uk/projects">youtu.be/6fCvy4-QKnA</a></p>', []],
 ];
+
+// NetNewsWire 7.3 renders feed videos itself, in [[primary_media]] and [[enclosures]] outside the body.
+// Each case: [name, {title, primary, body, enclosures}, expectedEmbedIdsInDocumentOrder].
+// Every NNW YouTube iframe must be replaced by our embed or removed, so a video never shows twice.
+const nnwVideo = (id) => `<div class="nnw-enclosure nnw-enclosure-video"><iframe src="https://www.youtube-nocookie.com/embed/${id}" width="640" height="390" allowfullscreen></iframe></div>`;
+const nnwPrimary = (id) => `<div class="nnw-primary-media">${nnwVideo(id)}</div>`;
+const nnwEnclosures = (...items) => `<div class="nnw-enclosures">\n${items.join('\n')}\n</div>`;
+const nnwAudio = '<div class="nnw-enclosure nnw-enclosure-audio"><audio controls preload="none" src="https://example.com/a.mp3"></audio></div>';
+const mediaCases = [
+  ["7.3 YouTube channel feed: primary video and title link", {title: "https://www.youtube.com/watch?v=6fCvy4-QKnA", primary: nnwPrimary("6fCvy4-QKnA"), body: "<p>Video description.</p>"}, ["6fCvy4-QKnA"]],
+  ["7.3 primary video also linked in body", {primary: nnwPrimary("6fCvy4-QKnA"), body: '<p><a href="https://youtu.be/6fCvy4-QKnA">Vid</a></p>'}, ["6fCvy4-QKnA"]],
+  ["7.3 primary video and another video in body", {primary: nnwPrimary("6fCvy4-QKnA"), body: "<p>youtu.be/sQtW_IPB-Yk</p>"}, ["6fCvy4-QKnA", "sQtW_IPB-Yk"]],
+  ["7.3 enclosure video also linked in body", {body: "<p>youtu.be/sQtW_IPB-Yk</p>", enclosures: nnwEnclosures(nnwVideo("sQtW_IPB-Yk"))}, ["sQtW_IPB-Yk"]],
+  ["7.3 enclosure video only", {body: "<p>No links.</p>", enclosures: nnwEnclosures(nnwVideo("3MH-aF3_3x0"))}, ["3MH-aF3_3x0"]],
+  ["7.3 duplicate removed, audio kept", {primary: nnwPrimary("6fCvy4-QKnA"), body: "<p>Text.</p>", enclosures: nnwEnclosures(nnwVideo("6fCvy4-QKnA"), nnwAudio)}, ["6fCvy4-QKnA"]],
+];
+
 (async () => {
   const src = await fetch('/scripts/template-scripts/youtube-link-rewrite.js', {cache:'reload'}).then(r => r.text());
   const results = [];
@@ -32,6 +49,22 @@ const cases = [
     const embedsInBody = body.querySelectorAll('.nnw-youtube-embed').length;
     const pass = JSON.stringify(ids) === JSON.stringify(expected) && embedsInBody === expected.length;
     results.push((pass ? 'PASS ' : 'FAIL ') + name + (pass ? '' : ' got=' + JSON.stringify(ids) + ' html=' + body.innerHTML.slice(0, 300)));
+  }
+  for (const [name, parts, expected] of mediaCases) {
+    const title = parts.title || "https://thechels.uk/projects/post";
+    document.body.innerHTML =
+      `<div class="articleTitle"><h1><a href="${title}">t</a></h1></div>` +
+      `<div class="articlePrimaryMedia">${parts.primary || ""}</div>` +
+      `<div id="bodyContainer">${parts.body || ""}</div>` +
+      `<div class="articleEnclosures">${parts.enclosures || ""}</div>`;
+    (0, eval)(src);
+    const ids = [...document.querySelectorAll('.nnw-youtube-iframe')].map(f => decodeURIComponent(f.src.split('?v=')[1]));
+    const leftoverNnwIframes = document.querySelectorAll('.nnw-enclosure-video > iframe').length;
+    const audioKept = !parts.enclosures?.includes('nnw-enclosure-audio') || document.querySelector('.nnw-enclosure-audio audio') !== null;
+    const enclosures = document.querySelector('.articleEnclosures');
+    const emptyWhenAllRemoved = enclosures.querySelector('.nnw-enclosure') !== null || enclosures.matches(':empty');
+    const pass = JSON.stringify(ids) === JSON.stringify(expected) && leftoverNnwIframes === 0 && audioKept && emptyWhenAllRemoved;
+    results.push((pass ? 'PASS ' : 'FAIL ') + name + (pass ? '' : ` got=${JSON.stringify(ids)} leftoverNnwIframes=${leftoverNnwIframes} audioKept=${audioKept} emptyWhenAllRemoved=${emptyWhenAllRemoved}`));
   }
   window.harnessResults = results;
   document.body.textContent = results.join('\n');

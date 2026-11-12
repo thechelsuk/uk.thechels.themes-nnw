@@ -2,3 +2,4 @@
 .vscode/
 dist/
 .claude/
+*.nnwtheme/template7.3.html

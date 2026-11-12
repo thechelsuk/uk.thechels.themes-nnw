@@ -17,6 +17,9 @@ fi
 # Templates are committed with script references only; inline the shared scripts before packaging.
 "$(dirname "${BASH_SOURCE[0]}")/inject-template-scripts.sh"
 
+# NetNewsWire 7.3+ reads template7.3.html, which adds the article media tags; build it from the injected template.
+"$(dirname "${BASH_SOURCE[0]}")/make-template-7.3.sh"
+
 mkdir -p dist
 shopt -s nullglob
 THEME_DIRS=( *.nnwtheme )
