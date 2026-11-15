@@ -16,3 +16,7 @@ jobs:
             site_host: themes-nnw\.thechels\.uk
             build: none
             site_dir: .
+            # NetNewsWire fills [[avatar_src]], [[feed_link]] and the like in
+            # each theme's template.html when it shows an article: not links.
+            # node_modules is the build's tooling, not the site.
+            extra_args: --exclude '\[\[' --exclude-path node_modules
