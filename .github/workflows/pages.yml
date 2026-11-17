@@ -6,6 +6,7 @@ on:
             - main
         paths:
             - "index.html"
+            - "404.html"
             - "preview.html"
             - "preview-nav.css"
             - "site.css"
@@ -46,7 +47,7 @@ jobs:
             - name: Build site
               run: |
                   mkdir -p _site
-                  cp CNAME index.html preview.html preview-nav.css site.css site.js LICENSE.md robots.txt sitemap.xml llms.txt favicon.ico _site/
+                  cp CNAME index.html 404.html preview.html preview-nav.css site.css site.js LICENSE.md robots.txt sitemap.xml llms.txt favicon.ico _site/
                   cp -R assets _site/assets
                   cp -R test _site/test
                   mkdir -p _site/scripts/template-scripts
